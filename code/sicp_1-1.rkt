@@ -139,5 +139,22 @@
 (define (true-false-cond b)
   (cond (b 1)
 	(else 0)))
+
 (define (true-false-if b)
   (if b 1 0))
+
+;; 1.1.8
+
+(define (sqrt-ls x)
+  (define (good-enough? guess)
+    (< (abs (- (square guess) x)) 0.0001))
+
+  (define (improve guess)
+    (average guess (/ x guess)))
+
+  (define (sqrt-iter guess)
+    (if (good-enough? guess)
+	guess
+	(iter (improve guess))))
+
+  (sqrt-iter 1.0))
