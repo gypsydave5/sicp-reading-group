@@ -385,3 +385,77 @@
 	(else (if (timed-prime-test lower)
 		  (search-for-primes (+ 2 lower) (- count 1))
 		  (search-for-primes (+ 2 lower) count)))))
+
+;; (search-for-primes 1000001 3)
+;; *** 1000003 time: 39 ***
+;; *** 1000033 time: 39 ***
+;; *** 1000037 time: 39 ***
+
+;; (search-for-primes 10000001 3)
+;; *** 10000019 time: 122 ***
+;; *** 10000079 time: 121 ***
+;; *** 10000103 time: 120 ***
+;;
+;; time increases by (sqrt n) where n is factor of the increased starting prime
+
+;; Exercise 1.23
+(define (next x)
+  (if (= x 2)
+      3
+      (+ x 2)))
+
+(define (smallest-divisor-next n)
+  (find-divisor-next n 2))
+(define (find-divisor-next n test-divisor)
+  (cond ((> (square test-divisor) n) n)
+	((divides? test-divisor n) test-divisor)
+	(else (find-divisor-next n (next test-divisor)))))
+(define (prime-next? n)
+  (= n (smallest-divisor-next n)))
+(define (start-prime-test-next n start-time)
+  (if (prime-next? n)
+      (report-prime n (- (runtime) start-time))
+      false))
+(define (timed-prime-test-next n)
+  (start-prime-test-next n (runtime)))
+(define (search-for-primes-next lower count)
+  (cond ((= 0 count) 0)
+	(else (if (timed-prime-test-next lower)
+		  (search-for-primes-next (+ 2 lower) (- count 1))
+		  (search-for-primes-next (+ 2 lower) count)))))
+
+;; (search-for-primes-next 10000001 3)
+;; *** 10000019 time: 73 ***
+;; *** 10000079 time: 74 ***
+;; *** 10000103 time: 74 ***
+;;
+;; c. twice as fast (73 : 122) ~ 7/12
+
+;; (search-for-primes-next 10000000001 5)
+;; *** 10000000019 time: 2342 ***
+;; *** 10000000033 time: 4451 ***
+;; *** 10000000061 time: 2265 ***
+;; *** 10000000069 time: 1977 ***
+;; *** 10000000097 time: 1986 ***
+
+;; (search-for-primes 10000000001 5)
+;; *** 10000000019 time: 6055 ***
+;; *** 10000000033 time: 3570 ***
+;; *** 10000000061 time: 3337 ***
+;; *** 10000000069 time: 3224 ***
+;; *** 10000000097 time: 4227 ***
+;;
+;; More like 2/3 ~ 1/2
+
+;; Exercise 1.24
+(define (start-prime-test-fmat n start-time)
+  (if (fast-prime? n 100)
+      (report-prime n (- (runtime) start-time))
+      false))
+(define (timed-prime-test-fmat n)
+  (start-prime-test-fmat n (runtime)))
+(define (search-for-primes-fmat lower count)
+  (cond ((= 0 count) 0)
+	(else (if (timed-prime-test-fmat lower)
+		  (search-for-primes-fmat (+ 2 lower) (- count 1))
+		  (search-for-primes-fmat (+ 2 lower) count)))))
