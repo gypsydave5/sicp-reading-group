@@ -1,8 +1,9 @@
 #lang sicp
 (#%require (rename racket racket-random random))
+(#%require (planet williams/science/random-source))
 (define (random n)
   (if (and (exact? n) (integer? n))
-      (racket-random n)
+      (random-integer n)
       (* n (racket-random))))
 					; 1.2 Procedures and the Processes They Generate
 
