@@ -449,14 +449,44 @@
 ;; More like 2/3 ~ 1/2
 
 ;; Exercise 1.24
-(define (start-prime-test-fmat n start-time)
-  (if (fast-prime? n 100)
+(define (start-prime-test-fmat n start-time i)
+  (if (fast-prime? n i)
       (report-prime n (- (runtime) start-time))
       false))
-(define (timed-prime-test-fmat n)
-  (start-prime-test-fmat n (runtime)))
-(define (search-for-primes-fmat lower count)
+(define (timed-prime-test-fmat n i)
+  (start-prime-test-fmat n (runtime) i))
+(define (search-for-primes-fmat lower count i)
   (cond ((= 0 count) 0)
-	(else (if (timed-prime-test-fmat lower)
-		  (search-for-primes-fmat (+ 2 lower) (- count 1))
-		  (search-for-primes-fmat (+ 2 lower) count)))))
+	(else (if (timed-prime-test-fmat lower i)
+		  (search-for-primes-fmat (+ 2 lower) (- count 1) i)
+		  (search-for-primes-fmat (+ 2 lower) count i)))))
+
+;; Discrepancies (probably?) due to `i' - and probably the random number generator too...
+
+;; Exercise 1.25
+;; APH's solution removes the reduction step as outlined in footnote(3)
+;; as (mod (* x y) m) = (mod (* (mod x m) (mod y m)) m)
+;; so, where y = x
+;; (mod (square (mod x m)) m)
+;;
+;; Combine this result with the results discussed around fast-expt
+;;        b^n = (b^(b/2))^2    if n is even
+;;        b^n = b * b^(n - 1)  if n is odd
+;; And we get to the version of expmod as defined
+
+;; Exercise 1.26
+;; Increases the required work by having to expand out (expmod base (/ exp 2) m) again
+
+;; Exercise 1.27
+
+(define (carmichael? n)
+  (define (iter n a mod)
+    (cond ((= a n) true)
+	  ((not (= mod a)) false)
+	  (else (iter n (inc a) (expmod (inc a) n n)))))
+  (iter n 2 (expmod 2 n n)))
+
+(define (find-next-carmichael lower)
+  (cond ((even? lower) (find-next-carmichael (inc lower)))
+	((and (carmichael? lower) (not (prime?? lower))) lower)
+	(else (find-next-carmichael (next lower)))))
