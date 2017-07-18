@@ -490,3 +490,36 @@
   (cond ((even? lower) (find-next-carmichael (inc lower)))
 	((and (carmichael? lower) (not (prime?? lower))) lower)
 	(else (find-next-carmichael (next lower)))))
+
+;; Exercise 1.28
+
+(define (check-nontrivial-sqrt1 x square m)
+  (if (and (= square 1)
+           (not (= x 1))
+           (not (= x (- m 1))))
+      0
+      square))
+
+(define (squaremod-with-check x m)
+  (check-nontrivial-sqrt1 x (remainder (expt x 2) m)) m)
+
+(define (miller-rabin-expmod base exp m)
+  (cond ((= exp 0) 1)
+	((even? exp) (squaremod-with-check
+                      (miller-rabin-expmod base (/ exp 2) m)) m)
+	(else (remainder (* base (miller-rabin-expmod base (- exp 1) m))
+			 m))))
+
+(define (miller-rabin-test n)
+  (define (try-it a)
+    (define (check-it x)
+      (and (not (= x 0))) (= x 1))
+    (check-it (miller-rabin-expmod a (- n 1) n)))
+  (try-it (+ 1 (random (- n 1)))))
+
+(define (miller-rabin-prime? n times)
+  (cond ((= times 0) true)
+	((miller-rabin-test n) (miller-rabin-prime? n (- times 1)))
+	(else false)))
+
+;; idk lol
