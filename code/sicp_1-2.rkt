@@ -1,6 +1,7 @@
 #lang sicp
 (#%require (rename racket racket-random random))
 (#%require (planet williams/science/random-source))
+(#%provide (rename prime??? prime?))
 (define (random n)
   (if (and (exact? n) (integer? n))
       (random-integer n)
@@ -219,6 +220,7 @@
 ;; (+ 1 (+ 1 (cc-2s 3 (cc-1s (- 5 1) (cc-0s (cc-2s 8 (cc-1s 10 0)))))))
 ;; ...
 ;; I think that this is not ultimately iterative
+;; due to the (+ 1 acc) branch - they accumulate
 
 ;; Exercise 1.11
 (define (ff n)
@@ -229,7 +231,47 @@
 	 (* 3 (f (- n 3))))))
 
 
-;; Exercise 1.12
+;; Exercise 1.12 
+;; 1
+;; 1 1
+;; 1 2 1
+;; 1 3 3 1
+;; 1 4 6 4 1
+;; pascal n = pascal (n - col)
+(define (pascal-r row col)
+  (cond
+   ((= row col 1) 1)
+   ((not (<= 1 col row)) 0)
+   (else (+ (pascal-r (- row 1) col)
+	    (pascal-r (- row 1) (- col 1))))))
+
+(define (triangular n)
+  (define (iter acc x)
+    (if (= x 0)
+	acc
+	(iter (+ acc x) (- x 1))))
+  (iter 0 n))
+
+(define (previous-triangular-number n)
+  (define (iter x)
+    (cond ((= (triangular x) n) (triangular x))
+	  ((> (triangular x) n) (triangular (- x 1)))
+	  (else (iter (+ 1 x)))))
+  (iter 1))
+
+(define (row n)
+  (define (iter x)
+    (if (>= (triangular x) n)
+	x
+	(iter (+ 1 x))))
+  (iter 1))
+
+(define (col n)
+  (- n (previous-triangular-number (- n 1))))
+
+(define (pascal n)
+  (pascal-r (row n) (col n)))
+
 ;; Exercise 1.13
 
 ;; 1.2.4 Exponentiation
@@ -501,12 +543,12 @@
       square))
 
 (define (squaremod-with-check x m)
-  (check-nontrivial-sqrt1 x (remainder (expt x 2) m)) m)
+  (check-nontrivial-sqrt1 x (remainder (expt x 2) m) m))
 
 (define (miller-rabin-expmod base exp m)
   (cond ((= exp 0) 1)
 	((even? exp) (squaremod-with-check
-                      (miller-rabin-expmod base (/ exp 2) m)) m)
+                      (miller-rabin-expmod base (/ exp 2) m) m))
 	(else (remainder (* base (miller-rabin-expmod base (- exp 1) m))
 			 m))))
 
@@ -518,8 +560,12 @@
   (try-it (+ 1 (random (- n 1)))))
 
 (define (miller-rabin-prime? n times)
-  (cond ((= times 0) true)
+  (cond ((= 1 n) false)
+	((= times 0) true)
 	((miller-rabin-test n) (miller-rabin-prime? n (- times 1)))
 	(else false)))
 
 ;; idk lol
+
+(define (prime??? n)
+  (miller-rabin-prime? n 10))
