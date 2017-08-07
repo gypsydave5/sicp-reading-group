@@ -226,12 +226,12 @@
 (define (ff n)
   (if (< n 3)
       n
-      (+ (f (- n 1))
-	 (* 2 (f (- n 2)))
-	 (* 3 (f (- n 3))))))
+      (+ (ff (- n 1))
+	 (* 2 (ff (- n 2)))
+	 (* 3 (ff (- n 3))))))
 
 
-;; Exercise 1.12 
+;; Exercise 1.12
 ;; 1
 ;; 1 1
 ;; 1 2 1
@@ -273,6 +273,14 @@
   (pascal-r (row n) (col n)))
 
 ;; Exercise 1.13
+
+;; \phi = 1 - (\sqrt 5 / 2)
+;;
+
+;; 1.2.3 Orders of Growth
+
+;; Exercise 1.14
+;; Exercise 1.15
 
 ;; 1.2.4 Exponentiation
 
@@ -316,6 +324,7 @@
   (if (= b 0)
       0
       (+ a (*r a (- b 1)))))
+
 (define (double x)
   (+ x x))
 
@@ -336,16 +345,39 @@
   (iter a b 0))
 
 ;; Exercise 1.19
-;; a' = bq + aq + ap
-;; b' = bp + aq
-;; b'' = b'p + a'q
-;;     = (bp + aq)p + (bq + aq + ap)q
-;;     = bpp + aqp + bqq + aqq + apq
-;;     = (2aqp + aqq) + (bpp + bqq)
-;;     = (2qp + q^2)a + (p^2 + q^2)b
+;;
+;; Fibonacci Q-Matrix
+;;
+;; | 1 1 | --> Q^n === | Fn+1 Fn   |
+;; | 1 0 |             | Fn   Fn-1 | 
+;;
+;; ... for p = 0, q = 1
+;; |q q|^2 --> (q^2 + q^2) 
+;; |q p|
+;;
+;;
+;; T_pq
+;; a | (q + p)  q | --> a(q + p) + bq
+;; b | q        p | --> aq + bp
+;;
+;; (T_pq)²
+;; | (q + p),  q|   | (q + p)  q| -->  | ((q + p)² + q²), (q(q + p) + qp)|
+;; | q      ,  p|   | q        p| -->  | (q(q + p) + pq), (q² + p²)      |
+;;
+;; p' = a((q + p)² + q²) + b(q(q + p) + qp
+;; q' = a(q(q + p) + pq) + b(q² + p²)      
+;; 
+;; 
+;; a'        = bq + aq + ap
+;; b'        = bp + aq
+;; b''       = b'p + a'q
+;;           = (bp + aq)p + (bq + aq + ap)q
+;;           = bpp + aqp + bqq + aqq + apq
+;;           = (2aqp + aqq) + (bpp + bqq) ;; collect b and a s
+;;           = (2qp + q^2)a + (p^2 + q^2)b
 ;; b'p + a'q = (2qp + q^2)a + (p^2 + q^2)b
-;; p' = (p^2 + q^2) ;; by substitution
-;; q' = (2qp + q^2)
+;; p'        = (p^2 + q^2) ;; by substitution - a element
+;; q'        = (2qp + q^2) ;; b element
 
 (define (best-fib n)
   (best-fib-iter 1 0 0 1 n))

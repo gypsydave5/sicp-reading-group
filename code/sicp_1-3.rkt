@@ -201,7 +201,7 @@
 
 ;;; fixed points - f(x) = x
 
-(define tolerance 0.0001)
+(define tolerance 0.00001)
 (define (fixed-point f first-guess)
   (define (close-enough? v1 v2)
     (< (abs (- v1 v2)) tolerance))
@@ -388,3 +388,85 @@
 	result
 	(iter (f result) (inc count))))
   (lambda (x) (iter x 0)))
+
+;; Exercise 1.44
+(define (smooth f)
+  (let ((dx 0.001))
+    (lambda (x)
+      (/ (+ (f x) (f (- x dx)) (f (+ x dx)))
+	 3))))
+
+(define (n-fold-smooth n f)
+  ((repeated smooth n) f))
+
+((n-fold-smooth 1  sqrt) 2)	   ;;  1.4142135623746859
+((n-fold-smooth 5  sqrt) 2)        ;;  1.4142134150606738
+((n-fold-smooth 10 sqrt) 2)	   ;;  1.4142132677464272
+
+;; Exercise 1.45
+
+;; (fixed-point-of-transform (lambda (y) (/ 2 (* y y y)))
+;; 			  (repeated average-damp 2)
+;; 			  1.0)
+;; 4-root
+
+;; (fixed-point-of-transform (lambda (y) (/ 2 (* y y y y)))
+;; 			  (repeated average-damp 2)
+;; 			  1.0)
+;; 5-root
+
+;; (fixed-point-of-transform (lambda (y) (/ 2 (* y y y y y)))
+;; 			  (repeated average-damp 2)
+;; 			  1.0)
+;; 6-root
+
+;; (fixed-point-of-transform (lambda (y) (/ 2 (* y y y y y y)))
+;; 			  (repeated average-damp 2)
+;; 			  1.0)
+;; 7 root
+
+;; (fixed-point-of-transform (lambda (y) (/ 2 (* y y y y y y y)))
+;; 			  (repeated average-damp 3)
+;; 			  1.0)
+;; 8 root (avg damp needed upping)
+
+;; log2 (4) = 2
+;; log2 (8) = 3
+;; log2 (16) = 4 ?
+
+;; (fixed-point-of-transform (lambda (y) (/ 2 (expt y 14)))
+;; 			  (repeated average-damp 3)
+;; 			  1.0)
+;; 15 root
+
+;; (fixed-point-of-transform (lambda (y) (/ 2 (expt y 14)))
+;; 			  (repeated average-damp 4) ;; fails for repeated 3
+;; 			  1.0)
+;; 16 root
+
+
+(define (floor-log2 n)
+  (define (iter acc x)
+    (if (= 1 x)
+	acc
+	(iter (inc acc) (quotient x 2))))
+  (iter 0 n))
+
+(define (nth-root n x)
+  (fixed-point-of-transform (lambda (y) (/ x (expt y (dec n))))
+			    (repeated average-damp (floor-log2 n))
+			    1.0))
+
+;; Exercise 1.46
+(define (iterative-improve good-enough? improve)
+  (define (iter guess previous-guess)
+    (if (good-enough? guess)
+	guess
+	(iter (improve guess) guess)))
+  (lambda (guess) (iter guess 1.0)))
+
+(define (sqrt-ii number)
+  ((iterative-improve
+    (lambda (guess) (< (abs (- (square guess) number)) 0.00001))
+    (lambda (guess) (average guess (/ number guess))))
+   1.0))
