@@ -337,7 +337,7 @@
 	(else (+ b (*rf b (- n 1))))))
 
 ;; Exercise 1.18
-(define (*lf a b)
+(define (*if a b)
   (define (iter a b acc)
     (cond ((= b 0) acc)
 	  ((even? b) (iter (double a) (halve b) acc))
@@ -349,10 +349,10 @@
 ;; Fibonacci Q-Matrix
 ;;
 ;; | 1 1 | --> Q^n === | Fn+1 Fn   |
-;; | 1 0 |             | Fn   Fn-1 | 
+;; | 1 0 |             | Fn   Fn-1 |
 ;;
 ;; ... for p = 0, q = 1
-;; |q q|^2 --> (q^2 + q^2) 
+;; |q q|^2 --> (q^2 + q^2)
 ;; |q p|
 ;;
 ;;
@@ -365,9 +365,9 @@
 ;; | q      ,  p|   | q        p| -->  | (q(q + p) + pq), (q² + p²)      |
 ;;
 ;; p' = a((q + p)² + q²) + b(q(q + p) + qp
-;; q' = a(q(q + p) + pq) + b(q² + p²)      
-;; 
-;; 
+;; q' = a(q(q + p) + pq) + b(q² + p²)
+;;
+;;
 ;; a'        = bq + aq + ap
 ;; b'        = bp + aq
 ;; b''       = b'p + a'q
@@ -418,7 +418,8 @@
 (define (prime?? n)
   (= n (smallest-divisor n)))
 
-
+;; Fermat's little theorem
+;; If n is prime, and a any positive less than n, then a^n === a mod n
 (define (expmod base exp m)
   (cond ((= exp 0) 1)
 	((even? exp)
@@ -427,6 +428,7 @@
 	(else
 	 (remainder (* base (expmod base (- exp 1) m))
 		    m))))
+
 
 (define (fermat-test n)
   (define (try-it a)
@@ -471,7 +473,9 @@
 ;; *** 10000079 time: 121 ***
 ;; *** 10000103 time: 120 ***
 ;;
-;; time increases by (sqrt n) where n is factor of the increased starting prime
+;; Increase of *~3
+;; time increases by (sqrt n)  where n is factor of the increased starting prime
+;; (sqrt of 10 is 3.somethingsomethingsomething
 
 ;; Exercise 1.23
 (define (next x)
@@ -481,20 +485,26 @@
 
 (define (smallest-divisor-next n)
   (find-divisor-next n 2))
+
 (define (find-divisor-next n test-divisor)
   (cond ((> (square test-divisor) n) n)
 	((divides? test-divisor n) test-divisor)
 	(else (find-divisor-next n (next test-divisor)))))
+
 (define (prime-next? n)
   (= n (smallest-divisor-next n)))
+
 (define (start-prime-test-next n start-time)
   (if (prime-next? n)
       (report-prime n (- (runtime) start-time))
       false))
+
 (define (timed-prime-test-next n)
   (start-prime-test-next n (runtime)))
+
 (define (search-for-primes-next lower count)
   (cond ((= 0 count) 0)
+
 	(else (if (timed-prime-test-next lower)
 		  (search-for-primes-next (+ 2 lower) (- count 1))
 		  (search-for-primes-next (+ 2 lower) count)))))
@@ -527,8 +537,10 @@
   (if (fast-prime? n i)
       (report-prime n (- (runtime) start-time))
       false))
+
 (define (timed-prime-test-fmat n i)
   (start-prime-test-fmat n (runtime) i))
+
 (define (search-for-primes-fmat lower count i)
   (cond ((= 0 count) 0)
 	(else (if (timed-prime-test-fmat lower i)
@@ -578,16 +590,19 @@
   (check-nontrivial-sqrt1 x (remainder (expt x 2) m) m))
 
 (define (miller-rabin-expmod base exp m)
-  (cond ((= exp 0) 1)
-	((even? exp) (squaremod-with-check
-                      (miller-rabin-expmod base (/ exp 2) m) m))
-	(else (remainder (* base (miller-rabin-expmod base (- exp 1) m))
-			 m))))
+  (cond ((= exp 0)
+	 1)
+	((even? exp)
+	 (squaremod-with-check (miller-rabin-expmod base (/ exp 2) m) m))
+	(else
+	 (remainder (* base (miller-rabin-expmod base (- exp 1) m)) m))))
 
 (define (miller-rabin-test n)
   (define (try-it a)
+
     (define (check-it x)
-      (and (not (= x 0))) (= x 1))
+      (and (not (= x 0)) (= x 1)))
+
     (check-it (miller-rabin-expmod a (- n 1) n)))
   (try-it (+ 1 (random (- n 1)))))
 

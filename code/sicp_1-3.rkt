@@ -24,7 +24,7 @@
 
 (define (pi-sum a b)
   (define (term n)
-    (/ 1.0 (* n (+ a 2))))
+    (/ 1.0 (* n (+ n 2))))
   (define (next n)
     (+ 4 n))
   (sum term a next b))
@@ -43,6 +43,12 @@
   (define (term k) (* (coeff k) (y k)))
   (* (/ h 3)
      (+ (y 0) (y n) (sum term 1 inc (dec n)))))
+
+(integral cube 0 1 1) 			;;  0.125
+(integral cube 0 1 10)
+(integral cube 0 1 1000) 		;;   0
+(simpsons-rule cube 0 1 1)              ;;   1/3
+(simpsons-rule cube 0 1 10) 		;;   1/4
 
 ;; Exercise 1.30
 (define (sum-iter term a next b)
@@ -68,17 +74,21 @@
 
 (define (pi accuracy)
   (define (term n)
-    (cond ((even? n) (/ (+ n 2.0) (+ n 3.0)))
-	  (else (/ (+ n 3) (+ n 2)))))
-  (* (product term 0 inc accuracy)
+    (cond ((even? n) (/ (+ n 2)
+			(+ n 3)))
+	  (else (/ (+ n 3)
+		   (+ n 2)))))
+  (* (product term 0.0 inc accuracy)
      4))
+
+(pi 1000000) 				;;  3.1415910827980547
 
 ;; b.
 (define (product-lr term a next b)
   (if (> a b)
       1
       (* (term a)
-	 (product term (next a) next b))))
+	 (product-lr term (next a) next b))))
 
 ;; Exercise 1.32
 ;; a.
