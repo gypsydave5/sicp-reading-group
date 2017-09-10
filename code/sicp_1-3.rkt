@@ -267,7 +267,7 @@
 ;; iterative solution - 'bottom up'
 (define (cont-frac n d k)
   (define (iter result term)
-    (if (= 0 term)
+    (if (= 0 term) ;; counting 'down' as we go up
 	result
 	(iter (/ (n term)
 		 (+ (d term) result))
@@ -279,7 +279,9 @@
   (define (recursion term)
     (/ (n term)
        (+ (d term)
-	  (if (= term k) 0 (recursion (inc term))))))
+	  (if (= term k) ;; counting 'up' as we go down
+	      0
+	      (recursion (inc term))))))
   (recursion 1))
 
 (define (reciprocal-of-phi approx) (cont-frac-r (lambda (i) 1.0)
@@ -392,7 +394,20 @@
   (lambda (x) (f (g x))))
 
 ;; Exercise 1.43
-(define (repeated f n)
+(define (repeated-r f n)
+  (if (= n 1)
+      f
+      (compose f (repeated-r f (dec n)))))
+
+(define (repeated-i f n)
+  (define (iter nf count)
+    (if (= count n)
+	nf
+	(iter (compose f nf) (inc count))))
+  (iter f 1))
+
+;; witout compose
+(define (repeated-no-compose f n)
   (define (iter result count)
     (if (= count n)
 	result
@@ -407,7 +422,7 @@
 	 3))))
 
 (define (n-fold-smooth n f)
-  ((repeated smooth n) f))
+  ((repeated-i smooth n) f))
 
 ((n-fold-smooth 1  sqrt) 2)	   ;;  1.4142135623746859
 ((n-fold-smooth 5  sqrt) 2)        ;;  1.4142134150606738
@@ -464,19 +479,29 @@
 
 (define (nth-root n x)
   (fixed-point-of-transform (lambda (y) (/ x (expt y (dec n))))
-			    (repeated average-damp (floor-log2 n))
+			    (repeated-i average-damp (floor-log2 n))
 			    1.0))
 
 ;; Exercise 1.46
 (define (iterative-improve good-enough? improve)
   (define (iter guess previous-guess)
-    (if (good-enough? guess)
+    (if (good-enough? guess previous-guess)
 	guess
 	(iter (improve guess) guess)))
   (lambda (guess) (iter guess 1.0)))
 
 (define (sqrt-ii number)
   ((iterative-improve
-    (lambda (guess) (< (abs (- (square guess) number)) 0.00001))
+    (lambda (guess previous-guess) (< (abs (- (square guess) number)) 0.00001))
     (lambda (guess) (average guess (/ number guess))))
    1.0))
+
+(define (fixed-point-ii f first-guess)
+  (let ((tolerance 0.00000000001))
+    ((iterative-improve
+      (lambda (guess previous-guess) (< (abs (- (f guess) previous-guess)) tolerance))
+      (lambda (guess) (f guess)))
+     first-guess)))
+
+(fixed-point cos 1.0)
+(fixed-point-ii cos 1.0)

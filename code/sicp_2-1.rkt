@@ -128,3 +128,105 @@
 (define (perimeter-rect2 rect)
   (+ (* 2 (width-rect2 rect))
      (* 2 (height-rect2 rect))))
+
+;; 2.1.3 What is Meant by Data?
+
+;; what makes the above a representation of rational numbers?
+;; For all integers n, and non zero integer d, if x is `(make-rat n d)` then (= (numer x) n)
+;; and (= (denom x) d)
+
+;; the same for cons, car and cdr
+
+;; and we can create these data structures out of procedures...
+
+(define (cons1 x y)
+  (define (dispatch m)
+    (cond ((= m 0) x)
+	  ((= m 1) y)
+	  (else (error "Argument not 0 or 1 -- CONS" m))))
+  dispatch)
+
+(define (car1 z) (z 0))
+(define (cdr1 z) (z 1))
+
+;; This is indistinguishable from the "real" data structure of cons. The procedural representation
+;; is perfectly adequate as it does the three things it needs to do...
+;; ...
+
+;; Hey, this is interesting
+
+(define (new-map)
+  (define (no-such-key k)
+    (error "No such key in map:" k))
+  no-such-key)
+
+(define (add map key value)
+  (define (new-map k)
+    (if (equal? k key)
+	value
+	(map k)))
+  new-map)
+
+(define (get map key)
+  (map key))
+
+(define my-map (add (new-map) 'a 1))
+(define my-map-2 (add my-map 'b 2))
+(define my-map-3 (add my-map-2 'c 3))
+(get my-map-3 'a)
+(get my-map-3 'b)
+(get my-map-3 'c)
+
+;; OK enough of this...
+
+;; Exercise 2.4 - even more cons!
+;; (this is even better)
+
+(define (consp x y)
+  (lambda (m) (m x y)))
+
+(define (carp z)
+  (z (lambda (p q) p)))
+
+(define (cdrp z)
+  (z (lambda (p q) q)))
+
+(carp (consp 1 2))
+(cdrp (consp 'a 'b))
+
+;; Exercise 2.5
+(define (consa a b)
+  (* (expt 2 a) (expt 3 b)))
+
+(define (c*ra base)
+  (define (iter c count)
+    (if (not (integer? (/ c base)))
+	count
+	(iter (/ c base) (+ 1 count))))
+  (lambda (c) (iter c 0)))
+
+(define cara (c*ra 2))
+(define cdra (c*ra 3))
+
+(cara (consa 55 88))
+(cdra (consa 128 256))
+
+;; data can be encoded in numbers :D
+
+;; Exercise 2.6
+
+(define zero (lambda (f) (lambda (x) x)))
+
+(define (add-1 n)
+  (lambda (f) (lambda (x) (f ((n f) x)))))
+
+(define (inc n) (+ 1 n))
+(define (ex l) (cons '() l))
+
+;; e.g.
+(((add-1 zero) inc) 0)
+(((add-1 (add-1 zero)) inc) 0)
+(((add-1 (add-1 (add-1 zero))) inc) 0)
+
+(((add-1 (add-1 zero)) ex) '())
+(((add-1 (add-1 (add-1 zero))) ex) '())
