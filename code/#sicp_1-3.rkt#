@@ -41,7 +41,6 @@
   (define (y k) (f (+ a (* k h))))
   (define (coeff k) (if (even? k) 2 4))
   (define (term k) (* (coeff k) (y k)))
-
   (* (/ h 3)
      (+ (y 0) (y n) (sum term 1 inc (dec n)))))
 
@@ -58,7 +57,6 @@
 	result
 	(iter (next a) (+ result (term a)))))
   (iter a 0))
-
 (define (sum-integers-iter a b)
   (sum-iter identity a inc b))
 
@@ -73,8 +71,6 @@
 
 (define (factorial n)
   (product identity 1 inc n))
-
-(factorial 5)                           ;;   120
 
 (define (pi accuracy)
   (define (term n)
@@ -120,7 +116,8 @@
   (if (> a b)
       null-value
       (combiner (term a)
-		(accumulate-lr combiner null-value term (next a) next b))))
+		(accumulate combiner null-value term (next a) next b))))
+
 ;; Exercise 1.33
 
 (define (filtered-accumulate filter combiner null-value term a next b)
@@ -129,12 +126,6 @@
 	result
 	(iter (next a) (combiner result (if (filter a) (term a) null-value)))))
   (iter a null-value))
-
-(define (f-accumulate-lr filter combiner null-value term a next b)
-  (if (> a b)
-      null-value
-      (combiner (if (filter a) (term a) null-value)
-                (f-accumulate-lr combiner null-value term (next a) next b))))
 
 ;; a.
 (define (sum-square-primes a b)
@@ -145,7 +136,6 @@
   (define (relative-prime x)
     (= 1 (gcd x n)))
   (filtered-accumulate relative-prime * 1 identity 0 inc n))
-
 
 ;; 1.3.2 Construction Procedures Using 'Lambda'
 
